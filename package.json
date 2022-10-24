@@ -1,34 +1,26 @@
 {
-  "name": "react-native-youtube",
-  "version": "2.0.2",
-  "description": "A <YouTube/> component for React Native.",
-  "main": "main.js",
-  "types": "main.d.ts",
+  "name": "react-native-youtube-sdk",
+  "version": "1.0.12",
+  "description": "YouTube SDK for react native",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/davidohayon669/react-native-youtube.git"
+    "url": "git+https://github.com/srfaytkn/react-native-youtube-sdk.git"
   },
-  "keywords": [
-    "youtube",
-    "react",
-    "react-native"
-  ],
-  "author": "Param Aggarwal",
-  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/davidohayon669/react-native-youtube/issues"
+    "url": "https://github.com/srfaytkn/react-native-youtube-sdk/issues"
   },
-  "homepage": "https://github.com/davidohayon669/react-native-youtube",
-  "dependencies": {
-    "prop-types": "^15.5.0"
-  },
+  "homepage": "https://github.com/srfaytkn/react-native-youtube-sdk#readme",
+  "author": "srfaytkn",
+  "license": "Apache 2.0",
+  "keywords": [
+    "react-native",
+    "youtube"
+  ],
   "peerDependencies": {
-    "react-native": ">=0.60"
-  },
-  "devDependencies": {
-    "prettier": "^2.0.4"
+    "react-native": "^0.62.1"
   }
 }

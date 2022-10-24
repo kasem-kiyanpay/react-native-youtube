@@ -1,245 +1,183 @@
-# react-native-youtube [![react-native-youtube](http://img.shields.io/npm/dm/react-native-youtube.svg)](https://www.npmjs.org/package/react-native-youtube) [![npm version](https://badge.fury.io/js/react-native-youtube.svg)](http://badge.fury.io/js/react-native-youtube) [![Dependency Status](https://david-dm.org/davidohayon669/react-native-youtube.svg)](https://david-dm.org/davidohayon669/react-native-youtube)
 
-A `<YouTube />` component for React Native.
+# react-native-youtube-sdk
 
-Uses [YoutubePlayer-in-WKWebView](https://github.com/hmhv/YoutubePlayer-in-WKWebView) for iOS and [YouTube Android Player API](https://developers.google.com/youtube/android/player/) for Android and exposes much of the API, as declaratively as possible, into React Native.
+[![npm version](https://badge.fury.io/js/react-native-youtube-sdk.svg)](https://badge.fury.io/js/react-native-youtube-sdk)
 
-[Having problems with Android? Please read this first](https://github.com/davidohayon669/react-native-youtube#known-issues)
+![Example Gif](https://sharelist2me.s3-eu-west-1.amazonaws.com/repo/example.gif)
 
-**Important!!!** - This README is for v2. [Latest README for v1 can be found here](https://github.com/davidohayon669/react-native-youtube/blob/v1.1.0/README.md)
+## Note
+- Your android app needs to be using the androidx libraries instead of the old support libraries.
 
-## Table of Contents
+## Video is unavailable problem
+- Origin is already set up in the library but you will notice that some videos are not playing. This is because the video is shared as not embeddable by provider. 
+- You can use YouTube Data API to solve this problem
+- Do not open an issue related to this
+## Getting started
 
-- [Screenshot](#screenshot)
-- [Install](#install)
-- [Usage](#usage)
-- [API](#api)
-- [Known Issues](#known-issues)
-- [Example App and Development](#example-app-and-development)
-- [Authors](#authors)
-- [License](#license)
+`$ npm install react-native-youtube-sdk --save`
 
-## Screenshot
+### Mostly automatic installation
 
-![Screenshot of the example app](https://github.com/davidohayon669/react-native-youtube/raw/master/Screenshot.png)
+`$ react-native link react-native-youtube-sdk`
 
-## Install
+#### iOS With CocoaPods
 
-Install the latest version to your `package.json`:
+1. Create a blank Swift file with bridge in your project (you can name it whatever you want) (to build swift code easily)
+2. `$ cd /ios`
+3. `$ pod install`
+4. Have fun
 
-`$ npm install react-native-youtube -S`
 
-React Native automatically connects this native module to your iOS and Android projects. On Android this linking is supported with Gradle and is done automatically after installation. On iOS the linking is done by Cocoapods, without the need to add this library to the `Podfile`, Just run `pod install` after installation.
+### Manual installation
 
-**IMPORTANT! (Android Only)**: The Android implementation of this component needs to have the official YouTube app installed on the device. Otherwise the user will be prompted to install / activate the app, and an error event will be triggered with `SERVICE_MISSING`/`SERVICE_DISABLED`.
 
-#### OPTIONAL: Activated sound when iPhone (iOS) is on vibrate mode
+#### iOS
 
-Open AppDelegate.m and add :
+1. In XCode, in the project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
+2. Go to `node_modules` ➜ `react-native-youtube-sdk` and add `YouTubeSdk.xcodeproj`
+3. In XCode, in the project navigator, select your project. Add `libYouTubeSdk.a` to your project's `Build Phases` ➜ `Link Binary With Libraries`
+4. Run your project (`Cmd+R`)
 
-- `#import <AVFoundation/AVFoundation.h>`
+#### Android
 
-- `[[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error: nil];` in your didFinishLaunchingWithOptions method
-
+1. Open up `android/app/src/main/java/[...]/MainApplication.java`
+  - Add `import com.srfaytkn.reactnative.YouTubeSdkPackage;` to the imports at the top of the file
+  - Add `new YouTubeSdkPackage()` to the list returned by the `getPackages()` method
+2. Append the following lines to `android/settings.gradle`:
+  	```
+  	include ':react-native-youtube-sdk'
+  	project(':react-native-youtube-sdk').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-youtube-sdk/android')
+  	```
+3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
+  	```
+    implementation project(':react-native-youtube-sdk')
+  	```
 ## Usage
 
-```jsx
-<YouTube
-  videoId="KVZ-P-ZI6W4" // The YouTube video ID
-  play // control playback of video with true/false
-  fullscreen // control whether the video should play in fullscreen or inline
-  loop // control whether the video should loop when ended
-  onReady={e => this.setState({ isReady: true })}
-  onChangeState={e => this.setState({ status: e.state })}
-  onChangeQuality={e => this.setState({ quality: e.quality })}
-  onError={e => this.setState({ error: e.error })}
-  style={{ alignSelf: 'stretch', height: 300 }}
+#### Example Component
+````javascript
+<YouTubePlayer
+  ref={ref => (this.youTubePlayer = ref)}
+  videoId="t_aIEOqB8VM"
+  autoPlay={true}
+  fullscreen={true}
+  showFullScreenButton={true}
+  showSeekBar={true}
+  showPlayPauseButton={true}
+  startTime={5}
+  style={{ width: "100%", height: 200 }}
+  onError={e => console.log(e)}
+  onChangeState={e => console.log(e)}
+  onChangeFullscreen={e => console.log(e)}
 />
-```
-
-## API
-
-### YouTube Component
-
-#### Importing
+````
+#### Example Usage
 
 ```javascript
-import YouTube from 'react-native-youtube';
+import React from "react";
+import { ScrollView, StyleSheet, View, TouchableOpacity, Text, ToastAndroid } from "react-native";
+import YouTubePlayer from "react-native-youtube-sdk";
+
+export default class App extends React.Component {
+  render() {
+    return (
+      <View style={styles.container}>
+        <ScrollView>
+          <YouTubePlayer
+            ref={ref => (this.youTubePlayer = ref)}
+            videoId="t_aIEOqB8VM"
+            autoPlay={true}
+            fullscreen={false}
+            showFullScreenButton={true}
+            showSeekBar={true}
+            showPlayPauseButton={true}
+            startTime={5}
+            style={{ width: "100%", height: 200 }}
+            onReady={e => console.log("onReady", e.type)}
+            onError={e => console.log("onError", e.error)}
+            onChangeState={e => console.log("onChangeState", e.state)}
+            onChangeFullscreen={e => console.log("onChangeFullscreen", e.isFullscreen)}
+          />
+          <View>
+            <TouchableOpacity style={styles.button} onPress={() => this.youTubePlayer.loadVideo("QdgRNIAdLi4", 0)}>
+              <Text style={{ color: "#ffffff" }}>loadVideo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => this.youTubePlayer.seekTo(10)}>
+              <Text style={{ color: "#ffffff" }}>SeekTo(10)</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => this.youTubePlayer.play()}>
+              <Text style={{ color: "#ffffff" }}>Play</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => this.youTubePlayer.pause()}>
+              <Text style={{ color: "#ffffff" }}>Pause</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={async () => {
+                const currentTime = await this.youTubePlayer.getCurrentTime();
+                ToastAndroid.show(String(currentTime), ToastAndroid.SHORT);
+              }}
+            >
+              <Text style={{ color: "#ffffff" }}>getCurrentTime</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={async () => {
+                const duration = await this.youTubePlayer.getVideoDuration();
+                ToastAndroid.show(String(duration), ToastAndroid.SHORT);
+              }}
+            >
+              <Text style={{ color: "#ffffff" }}>getVideoDuration</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  button: {
+    backgroundColor: "red",
+    margin: 12,
+    padding: 12,
+    borderRadius: 4,
+  },
+});
 ```
+## API
 
-#### Properties
+#### Props
 
-- `apiKey` (string, _Android_): Your YouTube developer API Key. This parameter is **required**. [More Info](https://developers.google.com/youtube/android/player/register).
-- `videoId` (string): The YouTube video ID to play. Can be changed while mounted to change the video playing.
-- `videoIds` (strings array): YouTube video IDs to be played as an interactive playlist. Can be changed while mounted. Overridden at start by `videoId`.
-- `playlistId` (string): A YouTube Playlist's ID to play as an interactive playlist.
-  Can be changed while mounted. Overridden at start by `videoId` and `videoIds`.
-- `play` (boolean): Controls playback of video with `true`/`false`. Setting it as `true` in the beginning itself makes the video autoplay on loading. Default: `false`.
-- `loop` (boolean): Loops the video. Default: `false`.
-- `fullscreen` (boolean): Controls whether the video should play inline or in fullscreen. Default: `false`.
-- `controls` (number): Sets the player's controls scheme. Supported values are `0`, `1`, `2`. Default: `1`. On iOS the numbers conform to [These Parameters](https://developers.google.com/youtube/player_parameters?hl=en#controls). On Android the mapping is `0 = CHROMELESS`, `1 = DEFAULT`, `2 = MINIMAL` ([More Info](https://developers.google.com/youtube/android/player/reference/com/google/android/youtube/player/YouTubePlayer.PlayerStyle)).
-- `showFullscreenButton` (boolean): Show or hide Fullscreen button. Default: `true`.
-- `showinfo` (boolean, _iOS_): Setting the parameter's value to false causes the player to not display information like the video title and uploader before the video starts playing. Default: `true`.
-- `modestbranding` (boolean, _iOS_): This parameter lets you use a YouTube player that does not show a YouTube logo. Default: `false`.
-- `origin` (string, _iOS_): This parameter provides an extra security measure for the iFrame API.
-- `rel` (boolean, _iOS_): Show related videos at the end of the video. Default: `true`.
-- `resumePlayAndroid` (boolean, _Android_): Makes the video resume playback after the app resumes from background. Default: `true`.
-
-The iOS implementation of this player uses the official YouTube iFrame under the hood, so most parameters behavior [can be further understood here.](https://developers.google.com/youtube/player_parameters)
-
-#### Events
-
-- `onReady`: Called once when the video player is setup.
-- `onChangeState`: Sends the current state of the player on `e.state`. Common values are `buffering`/`playing`/`paused` and more (on Android there is also a `seeking` state that comes with the location of the playback in seconds on `e.currentTime`).
-- `onChangeQuality`: Sends the current quality of video playback on `e.quality`.
-- `onError`: Sends any errors before and during video playback on `e.error`.
-- `onChangeFullscreen`: Called when the player enters or exits the fullscreen mode on `e.isFullscreen`.
-- `onProgress` _(iOS)_: Called every 500ms with the time progress of the playback on `e.currentTime`.
+| Prop                 | Required | Type     | Default value | Description                                                                                    |
+|----------------------|----------|----------|---------------|------------------------------------------------------------------------------------------------|
+| videoId              | false    | string   |               | YouTube video id                                                                               |
+| autoPlay             | false    | bool     | false         | Plays when video loaded                                                                        |
+| fullscreen           | false    | bool     | false         | The video is play in fullscreen                                                                | 
+| showFullScreenButton | false    | bool     | false         | Show or hide fullscreen button                                                                 |
+| showSeekBar          | false    | bool     | true          | Show or hide seekbar                                                                           |
+| showPlayPauseButton  | false    | bool     | true          | Show or hide play/pause button                                                                 |
+| startTime            | false    | number   | 0             | start time of video for first play                                                             |
+| onReady              | false    | func     |               | triggered when the player ready                                                                |
+| onError              | false    | func     |               | triggered when error occurs                                                                    |
+| onChangeState        | false    | func     |               | triggered when the state changes (UNKNOWN/UNSTARTED/ENDED/PLAYING/PAUSED/BUFFERING/VIDEO_CUED) |
+| onChangeFullscreen   | false    | func     |               | triggered when the player enters or exits the fullscreen mode                                  |
 
 #### Methods
 
-- `seekTo(seconds)`: Seeks to a specified time in the video.
-- `nextVideo()`: Skip to next video on a playlist (`videoIds` or `playlistId`). When `loop` is true, will skip to the first video from the last. If called on a single video, will restart the video.
-- `previousVideo()`: opposite of `nextVideo()`.
-- `playVideoAt(index)`: Will start playing the video at `index` (zero-based) position in a playlist (`videoIds` or `playlistId`. Not supported for `playlistId` on Android).
-- `getVideosIndex()`: Returns a Promise that results with the `index` (zero-based) number of the video currently played in a playlist (`videoIds` or `playlistId`. Not supported for `playlistId` on Android) or errors with an errorMessage string.
-- `getCurrentTime()`: Returns a Promise that results with the `currentTime` of the played video (in seconds) or errors with an errorMessage string. Should be used as an alternative for Android to `onProgress` event on iOS.
-- `getDuration()`: Returns a Promise that results with the `duration` of the played video (in seconds) or errors with an errorMessage string. Should be used as an alternative for Android to `onProgress` event on iOS.
-- `reloadIframe()` _(iOS)_: Specific props (`fullscreen`, `modestbranding`, `showinfo`, `rel`, `controls`, `origin`) can only be set at mounting and initial loading of the underlying WebView that holds the YouTube iFrame (Those are `<iframe>` parameters). If you want to change one of them during the lifecycle of the component, you should know the usability cost of loading the WebView again, and use this method right after the component received the updated prop.
+| Name             | Params             | Return  | Descriptipon                                                           |
+|------------------|--------------------|---------|------------------------------------------------------------------------|
+| seekTo           | seconds            | void    | Seeks to a specified time in the video                                 |
+| play             |                    | void    | play the video                                                         |
+| pause            |                    | void    | pause the video                                                        |
+| loadVideo        | videoId, startTime | void    | load a video to the player                                             |
+| getCurrentTime   |                    | promise | Returns promise that results with the current time of the played video |
+| getVideoDuration |                    | promise | Returns promise that results with the duration of the played video     |  
 
-### Standalone Player (iOS)
-
-#### Setup
-
-Standalone iOS player Uses [XCDYoutubeKit](https://github.com/0xced/XCDYouTubeKit) (**Warning**: XCDYoutubeKit doesn't conform to YouTube's Terms Of Use). Add the next line to your `Podfile` and run `pod install` inside `/ios` folder:
-
-```
-pod 'XCDYouTubeKit', '~> 2.8'
-```
-
-#### Importing
-
-```javascript
-import { YouTubeStandaloneIOS } from 'react-native-youtube';
-```
-
-#### Example
-
-```javascript
-YouTubeStandaloneIOS.playVideo('KVZ-P-ZI6W4')
-  .then(message => console.log(message))
-  .catch(errorMessage => console.error(errorMessage));
-```
-
-#### `YouTubeStandaloneIOS.playVideo(videoId)` (Static)
-
-A static method that returns a Promise to launch a standalone YouTube player with a specific video.
-
-- `videoId` (string): The YouTube Video ID to play. **Required**.
-
-### Standalone Player (Android)
-
-#### Importing
-
-```javascript
-import { YouTubeStandaloneAndroid } from 'react-native-youtube';
-```
-
-#### Example
-
-```javascript
-YouTubeStandaloneAndroid.playVideo({
-  apiKey: 'YOUR_API_KEY', // Your YouTube Developer API Key
-  videoId: 'KVZ-P-ZI6W4', // YouTube video ID
-  autoplay: true, // Autoplay the video
-  startTime: 120, // Starting point of video (in seconds)
-})
-  .then(() => console.log('Standalone Player Exited'))
-  .catch(errorMessage => console.error(errorMessage));
-```
-
-#### `YouTubeStandaloneAndroid.playVideo(options)` (Static)
-
-A static method that returns a Promise to launch a standalone YouTube player with a specific video.
-
-`options` is an object with properties:
-
-- `apiKey` (string): Your developer YouTube API key. **Required**.
-- `videoId` (string): The YouTube Video ID to play. **Required**.
-- `autoplay` (boolean): Should the video start automatically, Default: `false`.
-- `lightboxMode` (boolean): Should the video play inside a lightbox instead of fullscreen. Default: `false`.
-- `startTime` (number): Optional starting time of the video (in seconds). Default: `0`.
-
-#### `YouTubeStandaloneAndroid.playVideos(options)` (Static)
-
-A static method that returns a Promise to launch a standalone YouTube player with a specific video.
-
-`options` is an object with properties:
-
-- `apiKey` (string): Your developer YouTube API key. **Required**.
-- `videoIds` (strings array): The list of video IDs to be played. **Required**.
-- `autoplay` (boolean): Should the video start automatically, Default: `false`.
-- `lightboxMode` (boolean): Should the video play inside a lightbox instead of fullscreen. Default: `false`.
-- `startIndex` (number): The index position of the video to play first. Default: `0`.
-- `startTime` (number): Optional starting time of the video (in seconds). Default: `0`.
-
-#### `YouTubeStandaloneAndroid.playPlaylist(options)` (Static)
-
-A static method that returns a Promise to launch a standalone YouTube player with a specific video.
-
-`options` is an object with properties:
-
-- `apiKey` (string): Your developer YouTube API key. **Required**.
-- `playlistId` (string): The YouTube Playlist ID to play. **Required**.
-- `autoplay` (boolean): Should the video start automatically, Default: `false`.
-- `lightboxMode` (boolean): Should the video play inside a lightbox instead of fullscreen. Default: `false`.
-- `startIndex` (number): The index position of the video to play first. Default: `0`.
-- `startTime` (number): Optional starting time of the video (in seconds). Default: `0`.
-
-## Known Issues
-
-#### `UNAUTHORIZED_OVERLAY` and `PLAYER_VIEW_TOO_SMALL` on Android
-
-The Android version of this component is based on the official Java [YouTube Android Player API](https://developers.google.com/youtube/android/player/) which limits the ability to [cover player view](https://developers.google.com/youtube/android/player/reference/com/google/android/youtube/player/YouTubePlayer.ErrorReason.html#public-static-final-youtubeplayer.errorreason-unauthorized_overlay), or [render it too small](https://developers.google.com/youtube/android/player/reference/com/google/android/youtube/player/YouTubePlayer.ErrorReason.html#public-static-final-youtubeplayer.errorreason-player_view_too_small). Some React Native components such as navigation ones can interfere with these limitations in unpredictable ways. This issue is discussed in [#161](https://github.com/davidohayon669/react-native-youtube/issues/161).
-
-#### Changing `videoId` / `videoIds` / `playlistId` while the component is mounted in Android
-
-The Android API has bugs when props that identify the videos are changed during the lifecycle of the native component. For now it is recommended to re-mount a new `<YouTube />` instance each time there is a need to replace the video or playlist of a player. Also, looping through a `playlist` or `videoIds` is broken due to the underlying library's bugs.
-
-#### Multiple `<YouTube />` instances on Android
-
-The YouTube API for Android is a _singleton_. What it means is that unlike the iOS implementation, no two players can be mounted and play a video at the same time. If you have two scenes that happen to live together, or come one after the other (such as when navigating to a new scene), The new `<YouTube />` Will take the focus of the singleton and play the video, but after being unmounted, the older mounted `<YouTube />` will not be able to take the role back, and will need to be re-mounted.
-
-## Example App and Development
-
-This repository includes an example project that can be used for trying, developing and testing all functionalities on a dedicated clean app project.
-
-First, copy the git repository and install the React-Native project inside `/example`:
-
-```sh
-$ git clone https://github.com/davidohayon669/react-native-youtube.git
-$ cd react-native-youtube/example
-$ npm install
-```
-
-For iOS, also install the Cocoapods
-
-```sh
-$ cd ios
-$ pod install
-```
-
-Then build and run with `react-native run-ios` / `react-native run-android` or your preferred IDE.
-
-#### For Developers
-
-To be able to directly test your changes with the example app, re-install the package from the root directory with `npm run install-root` after each change. This command packs the root directory into an npm package `.tar` file and installs it locally to the example app.
-
-## Authors
-
-- Param Aggarwal (paramaggarwal@gmail.com)
-- David Ohayon ([@davidohayon669](https://twitter.com/davidohayon669))
-
-## License
-
-MIT License
+Thanks
+- [x] >= 1.0.6 iOS (https://github.com/mukeshydv/YoutubePlayerView) 
+- [x] <= 1.0.4- iOS (https://github.com/malkouz/youtube-ios-player-helper-swift) 
+- [x] Android (https://github.com/PierfrancescoSoffritti/android-youtube-player)
